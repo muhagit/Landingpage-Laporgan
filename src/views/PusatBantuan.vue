@@ -215,7 +215,7 @@
                   class="link-github"
                 >
                   <img
-                    src="../assets/images/foto_orang/nur.jpg"
+                    src=""
                     class="rounded-circle mx-auto mt-4 d-block object-fit-cover"
                     width="100"
                     height="100"
@@ -269,7 +269,7 @@
                   class="link-github"
                 >
                   <img
-                    src="../assets/images/foto_orang/ammar.jpg"
+                    src=""
                     class="rounded-circle mx-auto mt-4 d-block object-fit-cover"
                     width="100"
                     height="100"
@@ -296,7 +296,7 @@
                   class="link-github"
                 >
                   <img
-                    src="../assets/Images/foto_orang/ikhsan.jpeg"
+                    src=""
                     class="rounded-circle mx-auto mt-4 d-block object-fit-cover"
                     width="100"
                     height="100"
