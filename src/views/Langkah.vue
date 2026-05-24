@@ -46,27 +46,20 @@ export default {
 </script>
 
 <template>
-    <section
-        class="min-vh-100 py-5 "
-        id="langkahpengaduan"
-    >
-        <div class="container d-flex justify-content-center align-items-center flex-column">
+    <section class="min-vh-100 py-5" id="langkahpengaduan">
+        <div
+            class="container d-flex justify-content-center align-items-center flex-column"
+        >
             <h2
                 class="text-title text-center fw-bold text-primary"
                 data-aos="fade-up"
             >
                 Langkah Pengaduan
             </h2>
-            <p
-                class="mx-auto text-center pt-4 pb-1 text-pengaduan"
-                data-aos="fade-up"
-                data-aos-delay="200"
-            >
-                Ikuti langkah-langkah sederhana di bawah ini untuk menyampaikan
-                pengaduan Anda secara tepat dan terstruktur.
-            </p>
 
-            <div class="container w-100 mt-5 row d-flex justify-content-center align-items-center gy-4 gx-4">
+            <div
+                class="container w-100 mt-5 row d-flex justify-content-center align-items-center gy-4 gx-4"
+            >
                 <div
                     class="col-12 col-sm-6 col-md-6 col-lg-4 d-flex justify-content-center"
                     v-for="(layanan, index) in layananList"
@@ -80,6 +73,20 @@ export default {
                         :deskripsi="layanan.deskripsi"
                         class="blu shadow-lg w-100"
                     />
+                </div>
+                <div>
+                    <p
+                        class="des mx-auto text-center my-3"
+                        data-aos="fade-up"
+                        data-aos-duration="800"
+                        style="width: 700px;"
+                    >
+                        Membiarkan masalah tersebut bukan hanya mengganggu
+                        kenyamanan, tapi juga merugikan banyak pihak. Sayangnya,
+                        proses pelaporan yang rumit dan kekhawatiran akan
+                        bocornya privasi seringkali membuat kita memilih untuk
+                        diam.
+                    </p>
                 </div>
             </div>
         </div>

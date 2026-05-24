@@ -164,11 +164,18 @@ export default {
                         data-aos="fade-right"
                         data-aos-delay="300"
                     >
-                        <span class="">Pengaduan</span><br />
-                        Masyarakat
+                        <span class="">LAPORGAN</span>
                     </h1>
                     <p
-                        class="hero-text my-4 my-lg-5"
+                        class="hero-text mt-2 my-lg-3"
+                        data-aos="fade-up"
+                        data-aos-delay="400"
+                    >
+                        Sering menemui jalan berlubang, fasilitas rusak, atau
+                        pelayanan publik yang lambat? Anda tidak sendirian.
+                    </p>
+                    <p
+                        class="hero-text mt-lg-2"
                         data-aos="fade-up"
                         data-aos-delay="400"
                     >

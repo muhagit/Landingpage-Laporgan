@@ -48,7 +48,6 @@ export default {
                         data-aos="fade-up"
                         data-aos-delay="200"
                         data-aos-duration="800"
-
                     >
                         LAYANAN
                     </h1>
@@ -58,11 +57,11 @@ export default {
                         data-aos="fade-up"
                         data-aos-delay="200"
                     >
-                        Platform pengaduan masyarakat digital ini hadir untuk
-                        memberikan solusi cepat dan transparan dalam menangani
-                        setiap laporan dari warga. Melalui layanan ini,
-                        kami ingin menciptakan lingkungan yang lebih aman,
-                        transparan, dan akuntabel bagi seluruh masyarakat.
+                        Laporgan hadir untuk memutus rantai birokrasi tersebut.
+                        Dengan platform digital yang aman, jaminan privasi, dan
+                        fitur pelacakan status laporan secara real-time, suara
+                        Anda kini bisa membawa perubahan. Lapor cepat, pantau
+                        mudah, dan wujudkan lingkungan yang lebih baik sekarang!
                     </p>
                 </div>
             </div>

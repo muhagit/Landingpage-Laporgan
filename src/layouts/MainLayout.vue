@@ -53,18 +53,14 @@ onBeforeUnmount(() => {
   <nav ref="navbarContainer" class="navbar navbar-expand-lg navbar-dark shadow-lg fixed-top" id="navbar">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-        <img
-          src="../assets/Images/logo.png"
-          alt="logo"
-          style="width: 40px; height: 40px"
-        />
+       
         <router-link
           to="/"
           class="text-decoration-none text-light fw-bold fst-italic d-flex flex-column flex-lg-row"
           style="line-height: 1.2"
         >
-          <span class="me-lg-1">Pengaduan</span>
-          <span>Masyarakat</span>
+          <span class="me-lg-1">LaporGan</span>
+       
         </router-link>
       </a>
 
