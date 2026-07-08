@@ -206,12 +206,13 @@ export default {
                         data-aos="fade-up"
                         data-aos-delay="500"
                     >
-                        <BlueButton
-                            text="Pelajari Cara Kerjanya"
-                            class="button-blue"
-                            href="#langkahpengaduan"
-                            icon="fa fa-arrow-right"
-                        />
+                        <a href="#langkahpengaduan" class="text-decoration-none">
+                            <BlueButton
+                                text="Pelajari Cara Kerjanya"
+                                class="button-blue"
+                                icon="fa fa-arrow-right"
+                            />
+                        </a>
                         <router-link
                             to="/formpengaduan"
                             class="text-decoration-none"
