@@ -1,14 +1,19 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
+import { RouterLink, RouterView, useRoute } from "vue-router";
 import loginButton from "@/components/WhiteButtonOutline.vue";
-import { ref, onMounted } from "vue";
-import { onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 const lastScrollPosition = ref(0);
 const isNavbarVisible = ref(true);
 const navbar = ref(null);
 const navbarContainer = ref(null);
 // Untuk toggle hamburger menu
 const isNavOpen = ref(false);
+
+const route = useRoute();
+const showNavbar = computed(() => {
+  const path = route.path || '';
+  return !path.startsWith('/admin') && path !== '/login' && path !== '/daftar';
+});
 const handleClickOutside = (event) => {
   if (isNavOpen.value && navbarContainer.value && !navbarContainer.value.contains(event.target)) {
     closeNavbar();
@@ -50,7 +55,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <nav ref="navbarContainer" class="navbar navbar-expand-lg navbar-dark shadow-lg fixed-top" id="navbar">
+  <nav v-if="showNavbar" ref="navbarContainer" class="navbar navbar-expand-lg navbar-dark shadow-lg fixed-top" id="navbar">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center gap-2" href="#">
        
@@ -94,7 +99,9 @@ onBeforeUnmount(() => {
     </div>
   </nav>
 
-  <router-view></router-view>
+  <div :class="{ 'content-offset': showNavbar && route.path !== '/' }">
+    <router-view></router-view>
+  </div>
 </template>
 
 <style scoped>
@@ -121,5 +128,9 @@ onBeforeUnmount(() => {
 
 .navbar-toggler::after {
   border: none;
+}
+
+.content-offset {
+  margin-top: 76px;
 }
 </style>

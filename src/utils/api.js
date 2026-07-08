@@ -174,6 +174,42 @@ const initLocalStorage = () => {
     };
     localStorage.setItem('laporgan_landing_content', JSON.stringify(defaultLandingContent));
   }
+
+  if (!localStorage.getItem('laporgan_berita')) {
+    const defaultBerita = [
+      {
+        id: 1,
+        judul: 'Pemerintah Kota Lakukan Pengaspalan Jalan di Condongcatur',
+        ringkasan: 'Dinas Pekerjaan Umum melakukan pengaspalan jalan rusak sepanjang 2 kilometer di kawasan Condongcatur untuk meningkatkan keselamatan berkendara.',
+        konten: 'Kondisi jalan yang berlubang di kawasan Condongcatur akhirnya mendapat perhatian serius dari Pemerintah Kota. Dinas Pekerjaan Umum (DPU) mulai melakukan perbaikan jalan rusak dengan melakukan pengaspalan ulang sepanjang 2 kilometer.\n\nPerbaikan ini dijadwalkan selesai dalam waktu satu minggu dan diharapkan dapat mengurangi risiko kecelakaan lalu lintas, terutama bagi pengendara sepeda motor di malam hari. Warga diimbau untuk menggunakan rute alternatif selama proses pengaspalan berlangsung.',
+        kategori: 'Pembangunan',
+        gambar: 'https://images.unsplash.com/photo-1515162305285-0293e4767cc2?q=80&w=600',
+        tanggal: '2026-07-05T08:00:00.000Z',
+        penulis: 'Admin LaporGan'
+      },
+      {
+        id: 2,
+        judul: 'Sosialisasi Penggunaan Sistem Pengaduan Digital LaporGan',
+        ringkasan: 'Sosialisasi aplikasi LaporGan diadakan di balai desa guna mengedukasi masyarakat dalam membuat pengaduan secara digital dan melacak statusnya.',
+        konten: 'Dalam rangka meningkatkan partisipasi masyarakat dalam pengawasan fasilitas publik, tim pengembang berkolaborasi dengan jajaran kecamatan menyelenggarakan sosialisasi aplikasi pengaduan digital LaporGan.\n\nMelalui platform ini, warga diajarkan cara melakukan registrasi, mengirim aduan dengan bukti foto, dan melakukan pelacakan status laporan secara langsung. Sosialisasi ini diharapkan dapat mempercepat penyelesaian keluhan warga di berbagai sektor.',
+        kategori: 'Pengumuman',
+        gambar: 'https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?q=80&w=600',
+        tanggal: '2026-07-06T10:30:00.000Z',
+        penulis: 'Hubungan Masyarakat'
+      },
+      {
+        id: 3,
+        judul: 'Kerja Bakti Masal Antisipasi Musim Hujan di Bantaran Sungai Code',
+        ringkasan: 'Warga bersama relawan kebersihan melakukan aksi kerja bakti membersihkan sampah dan mendalamkan saluran drainase di bantaran Sungai Code.',
+        konten: 'Menjelang datangnya musim penghujan, ratusan warga bantaran Sungai Code bersama berbagai komunitas relawan kebersihan menyelenggarakan aksi kerja bakti masal.\n\nFokus utama dari kerja bakti ini adalah membersihkan tumpukan sampah plastik yang menyumbat aliran air sungai serta mendalamkan saluran drainase di sekitar pemukiman. Aksi ini bertujuan untuk meminimalisasi potensi luapan air sungai (banjir) yang kerap melanda wilayah tersebut setiap tahun.',
+        kategori: 'Kegiatan',
+        gambar: 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?q=80&w=600',
+        tanggal: '2026-07-07T07:00:00.000Z',
+        penulis: 'Redaksi LaporGan'
+      }
+    ];
+    localStorage.setItem('laporgan_berita', JSON.stringify(defaultBerita));
+  }
 };
 
 // Panggil fungsi inisialisasi saat script dimuat
@@ -479,5 +515,92 @@ export const api = {
     }
     localStorage.setItem('laporgan_landing_content', JSON.stringify(content));
     return content;
+  },
+
+  // ==================== BERITA ====================
+  async getBerita() {
+    try {
+      const response = await fetch(`${BASE_URL}/berita`, { signal: AbortSignal.timeout(3000) });
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (e) {
+      console.warn('Backend API /berita tidak dapat dijangkau, menggunakan localStorage fallback', e);
+    }
+    return JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
+  },
+
+  async createBerita(beritaData) {
+    try {
+      const response = await fetch(`${BASE_URL}/berita`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(beritaData),
+        signal: AbortSignal.timeout(3000)
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (e) {
+      console.warn('Gagal menambah berita ke backend, simpan lokal.', e);
+    }
+
+    const berita = JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
+    const newBerita = {
+      id: berita.length > 0 ? Math.max(...berita.map(b => b.id)) + 1 : 1,
+      ...beritaData,
+      tanggal: new Date().toISOString()
+    };
+    berita.push(newBerita);
+    localStorage.setItem('laporgan_berita', JSON.stringify(berita));
+    return newBerita;
+  },
+
+  async updateBerita(id, beritaData) {
+    try {
+      const response = await fetch(`${BASE_URL}/berita/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(beritaData),
+        signal: AbortSignal.timeout(3000)
+      });
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (e) {
+      console.warn('Gagal update berita ke backend, simpan lokal.', e);
+    }
+
+    const berita = JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
+    const index = berita.findIndex(b => b.id === parseInt(id));
+    if (index !== -1) {
+      berita[index] = {
+        ...berita[index],
+        ...beritaData,
+        updated_at: new Date().toISOString()
+      };
+      localStorage.setItem('laporgan_berita', JSON.stringify(berita));
+      return berita[index];
+    }
+    throw new Error('Berita tidak ditemukan');
+  },
+
+  async deleteBerita(id) {
+    try {
+      const response = await fetch(`${BASE_URL}/berita/${id}`, {
+        method: 'DELETE',
+        signal: AbortSignal.timeout(3000)
+      });
+      if (response.ok) {
+        return true;
+      }
+    } catch (e) {
+      console.warn('Gagal hapus berita dari backend, hapus lokal.', e);
+    }
+
+    let berita = JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
+    berita = berita.filter(b => b.id !== parseInt(id));
+    localStorage.setItem('laporgan_berita', JSON.stringify(berita));
+    return true;
   }
 };
