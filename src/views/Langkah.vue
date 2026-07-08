@@ -1,5 +1,6 @@
 <script>
 import BlueCard from "@/components/BlueCard.vue";
+import { api } from "@/utils/api";
 
 export default {
     components: {
@@ -8,40 +9,49 @@ export default {
     name: "LangkahPengaduan",
     data() {
         return {
-            layananList: [
-                {
-                    nomor: "1",
-                    judul: "Hubungi Bot Telegram",
-                    deskripsi:
-                        "Kirim pesan ke bot Telegram @LayananAduan_Bot untuk mendapatkan akses pengaduan.",
-                },
-                {
-                    nomor: "2",
-                    judul: "Isi Formulir",
-                    deskripsi:
-                        "Lengkapi formulir yang disediakan dengan informasi yang diperlukan mengenai pengaduan Anda.",
-                },
-                {
-                    nomor: "3",
-                    judul: "Lampirkan Bukti",
-                    deskripsi:
-                        "Sertakan dokumen atau bukti pendukung yang relevan untuk memperkuat pengaduan Anda.",
-                },
-                {
-                    nomor: "4",
-                    judul: "Periksa Ulang",
-                    deskripsi:
-                        "Pastikan semua informasi yang Anda berikan akurat dan valid sebelum mengirimkan pengaduan.",
-                },
-                {
-                    nomor: "5",
-                    judul: "Tindak Lanjut",
-                    deskripsi:
-                        "Setelah pengaduan diajukan, pihak terkait akan memberikan tanggapan atau tindakan selanjutnya.",
-                },
-            ],
+            langkahContent: {
+                title: "Langkah Pengaduan",
+                description: "Membiarkan masalah tersebut bukan hanya mengganggu kenyamanan, tapi juga merugikan banyak pihak. Sayangnya, proses pelaporan yang rumit dan kekhawatiran akan bocornya privasi seringkali membuat kita memilih untuk diam.",
+                list: [
+                    {
+                        nomor: "1",
+                        judul: "Hubungi Bot Telegram",
+                        deskripsi: "Kirim pesan ke bot Telegram @LayananAduan_Bot untuk mendapatkan akses pengaduan.",
+                    },
+                    {
+                        nomor: "2",
+                        judul: "Isi Formulir",
+                        deskripsi: "Lengkapi formulir yang disediakan dengan informasi yang diperlukan mengenai pengaduan Anda.",
+                    },
+                    {
+                        nomor: "3",
+                        judul: "Lampirkan Bukti",
+                        deskripsi: "Sertakan dokumen atau bukti pendukung yang relevan untuk memperkuat pengaduan Anda.",
+                    },
+                    {
+                        nomor: "4",
+                        judul: "Periksa Ulang",
+                        deskripsi: "Pastikan semua informasi yang Anda berikan akurat dan valid sebelum mengirimkan pengaduan.",
+                    },
+                    {
+                        nomor: "5",
+                        judul: "Tindak Lanjut",
+                        deskripsi: "Setelah pengaduan diajukan, pihak terkait akan memberikan tanggapan atau tindakan selanjutnya.",
+                    },
+                ]
+            }
         };
     },
+    async mounted() {
+        try {
+            const data = await api.getLandingContent();
+            if (data && data.langkah) {
+                this.langkahContent = data.langkah;
+            }
+        } catch (e) {
+            console.error('Failed to load langkah pengaduan content:', e);
+        }
+    }
 };
 </script>
 
@@ -54,7 +64,7 @@ export default {
                 class="text-title text-center fw-bold text-primary"
                 data-aos="fade-up"
             >
-                Langkah Pengaduan
+                {{ langkahContent.title }}
             </h2>
 
             <div
@@ -62,7 +72,7 @@ export default {
             >
                 <div
                     class="col-12 col-sm-6 col-md-6 col-lg-4 d-flex justify-content-center"
-                    v-for="(layanan, index) in layananList"
+                    v-for="(layanan, index) in langkahContent.list"
                     :key="index"
                     :data-aos="'fade-up'"
                     :data-aos-delay="(index + 1) * 200"
@@ -81,11 +91,7 @@ export default {
                         data-aos-duration="800"
                         style="width: 700px;"
                     >
-                        Membiarkan masalah tersebut bukan hanya mengganggu
-                        kenyamanan, tapi juga merugikan banyak pihak. Sayangnya,
-                        proses pelaporan yang rumit dan kekhawatiran akan
-                        bocornya privasi seringkali membuat kita memilih untuk
-                        diam.
+                        {{ langkahContent.description }}
                     </p>
                 </div>
             </div>

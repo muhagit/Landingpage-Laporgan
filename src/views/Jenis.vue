@@ -1,5 +1,6 @@
 <script>
 import JenisCard from "@/components/JenisCard.vue";
+import { api } from "@/utils/api";
 
 export default {
     name: "JenisPengaduan",
@@ -8,30 +9,40 @@ export default {
     },
     data() {
         return {
-            layananList: [
-                {
-                    judul: "Layanan Publik",
-                    deskripsi:
-                        "Pengaduan terkait kualitas atau ketidakpuasan terhadap layanan yang diberikan oleh instansi pemerintah, seperti pelayanan kesehatan, pendidikan, dan administrasi",
-                },
-                {
-                    judul: "Keamanan",
-                    deskripsi:
-                        "Pengaduan mengenai masalah keamanan, seperti tindakan kriminal, kehilangan barang, kebocoran data pribadi, kebisingan, atau gangguan ketertiban umum",
-                },
-                {
-                    judul: "Fasilitas Umum",
-                    deskripsi:
-                        "Pengaduan mengenai kondisi fasilitas umum, seperti jalan, jembatan, taman, halte bus, dan sarana transportasi yang tidak memadai atau rusak",
-                },
-                {
-                    judul: "Seksual",
-                    deskripsi:
-                        "Pengaduan seksual meliputi pelecehan, kekerasan, dan eksploitasi seksual yang dialami di berbagai lingkungan seperti tempat kerja, sekolah, atau rumah tangga",
-                },
-            ],
+            jenisContent: {
+                title: "Jenis Pengaduan",
+                description: "Platform pengaduan ini menyediakan berbagai jenis kategori pengaduan yang dapat diakses oleh masyarakat. Masing-masing kategori dirancang untuk menangani isu-isu yang berbeda, sehingga pengaduan yang disampaikan dapat segera diproses dan ditangani oleh pihak yang berwenang.",
+                list: [
+                    {
+                        judul: "Layanan Publik",
+                        deskripsi: "Pengaduan terkait kualitas atau ketidakpuasan terhadap layanan yang diberikan oleh instansi pemerintah, seperti pelayanan kesehatan, pendidikan, dan administrasi",
+                    },
+                    {
+                        judul: "Keamanan",
+                        deskripsi: "Pengaduan mengenai masalah keamanan, seperti tindakan kriminal, kehilangan barang, kebocoran data pribadi, kebisingan, atau gangguan ketertiban umum",
+                    },
+                    {
+                        judul: "Fasilitas Umum",
+                        deskripsi: "Pengaduan mengenai kondisi fasilitas umum, seperti jalan, jembatan, taman, halte bus, dan sarana transportasi yang tidak memadai atau rusak",
+                    },
+                    {
+                        judul: "Seksual",
+                        deskripsi: "Pengaduan seksual meliputi pelecehan, kekerasan, dan eksploitasi seksual yang dialami di berbagai lingkungan seperti tempat kerja, sekolah, atau rumah tangga",
+                    },
+                ]
+            }
         };
     },
+    async mounted() {
+        try {
+            const data = await api.getLandingContent();
+            if (data && data.jenis) {
+                this.jenisContent = data.jenis;
+            }
+        } catch (e) {
+            console.error('Failed to load jenis pengaduan content:', e);
+        }
+    }
 };
 </script>
 
@@ -61,7 +72,7 @@ export default {
                 data-aos="fade-up"
                 data-aos-duration="800"
             >
-                Jenis Pengaduan
+                {{ jenisContent.title }}
             </h1>
             <p
                 class="des mx-auto text-center my-3"
@@ -69,16 +80,12 @@ export default {
                 data-aos-duration="800"
                 
             >
-                Platform pengaduan ini menyediakan berbagai jenis kategori
-                pengaduan yang dapat diakses oleh masyarakat. Masing-masing
-                kategori dirancang untuk menangani isu-isu yang berbeda,
-                sehingga pengaduan yang disampaikan dapat segera diproses dan
-                ditangani oleh pihak yang berwenang.
+                {{ jenisContent.description }}
             </p>
             <div class="row g-4 justify-content-center my-5">
                 <div
                     class="col-md-5 d-flex justify-content-center"
-                    v-for="(layanan, index) in layananList"
+                    v-for="(layanan, index) in jenisContent.list"
                     :key="index"
                     :data-aos="index % 2 === 0 ? 'fade-right' : 'fade-left'" 
                     data-aos-duration="800"

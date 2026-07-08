@@ -5,8 +5,9 @@
             <div v-if="showError" class="alert alert-danger position-fixed bottom-0 end-0 m-3" role="alert">
                 {{ errorMessage }}
             </div>
-            <div v-if="showSuccess" class="alert alert-success position-fixed bottom-0 end-0 m-3" role="alert">
-                Berhasil mengirimkan aduan, terus ikuti perkembangan laporan anda di halaman pengguna
+            <div v-if="showSuccess" class="alert alert-success position-fixed bottom-0 end-0 m-3 shadow-lg" role="alert" style="z-index: 10000;">
+                <i class="fas fa-check-circle me-2"></i>
+                Berhasil mengirimkan aduan! Nomor tiket Anda: <strong>{{ submittedTicket }}</strong>. Harap catat nomor tiket ini untuk melacak status laporan.
             </div>
 
             <header class="row">
@@ -118,6 +119,8 @@
 </template>
 
 <script>
+import { api } from '@/utils/api';
+
 export default {
     data() {
         return {
@@ -135,6 +138,7 @@ export default {
             showSuccess: false,
             kategoriList: [],
             showConfirmModal: false,
+            submittedTicket: '',
         };
     },
     methods: {
@@ -151,12 +155,11 @@ export default {
                 return;
             }
 
-            // Validasi username telegram ke backend
+            // Validasi username telegram
             try {
-                const res = await fetch(`http://127.0.0.1:8000/api/cek-telegram/${this.telegram_username}`);
-                const result = await res.json();
-                if (!res.ok || !result.valid) {
-                    this.errorMessage = `Username Telegram "${this.telegram_username}" tidak ditemukan.`;
+                const result = await api.checkTelegram(this.telegram_username);
+                if (!result || !result.valid) {
+                    this.errorMessage = `Username Telegram "${this.telegram_username}" tidak ditemukan atau tidak valid.`;
                     this.showError = true;
                     setTimeout(() => (this.showError = false), 3000);
                     return;
@@ -189,20 +192,16 @@ export default {
                 formData.append('bukti_foto', this.foto);
                 formData.append('setuju', '1');
 
-                const response = await fetch('http://127.0.0.1:8000/api/pengaduan', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error("Gagal mengirim data");
-                }
-
-                await response.json();
+                const response = await api.createPengaduan(formData);
+                this.submittedTicket = response.tiket_lacak;
                 this.showSuccess = true;
-                setTimeout(() => (this.showSuccess = false), 3000);
+                
+                // Reset semua field setelah delay agar user sempat melihat nomor tiket
+                setTimeout(() => {
+                    this.showSuccess = false;
+                    this.submittedTicket = '';
+                }, 10000);
 
-                // Reset semua field
                 this.judul = '';
                 this.nama = '';
                 this.telegram_username = '';
@@ -212,8 +211,10 @@ export default {
                 this.isi_laporan = '';
                 this.foto = null;
                 this.agree = false;
-                document.getElementById('foto').value = '';
+                const fileInput = document.getElementById('foto');
+                if (fileInput) fileInput.value = '';
             } catch (error) {
+                console.error(error);
                 this.errorMessage = 'Gagal mengirim data. Coba lagi nanti.';
                 this.showError = true;
                 setTimeout(() => (this.showError = false), 3000);
@@ -222,9 +223,7 @@ export default {
 
         async fetchKategori() {
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/kategori');
-                if (!response.ok) throw new Error("Gagal mengambil data kategori");
-                this.kategoriList = await response.json();
+                this.kategoriList = await api.getKategori();
             } catch (error) {
                 console.error('Error fetching kategori:', error);
             }

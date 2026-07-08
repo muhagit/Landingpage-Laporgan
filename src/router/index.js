@@ -44,9 +44,35 @@ const routes = [
     },
 
     {
-        path: "/:pathMatch(.*)*",
-        name: "NotFound",
-        component: () => import("@/views/NotFound.vue")
+        path: "/admin",
+        component: () => import("@/layouts/AdminLayout.vue"),
+        meta: { requiresAuth: true },
+        children: [
+            {
+                path: "",
+                redirect: { name: "AdminDashboard" }
+            },
+            {
+                path: "dashboard",
+                name: "AdminDashboard",
+                component: () => import("@/views/admin/Dashboard.vue")
+            },
+            {
+                path: "pengaduan",
+                name: "AdminPengaduan",
+                component: () => import("@/views/admin/PengaduanList.vue")
+            },
+            {
+                path: "kategori",
+                name: "AdminKategori",
+                component: () => import("@/views/admin/KategoriList.vue")
+            },
+            {
+                path: "editor",
+                name: "AdminEditor",
+                component: () => import("@/views/admin/LandingPageEditor.vue")
+            }
+        ]
     },
 
     {
@@ -58,11 +84,38 @@ const routes = [
         path: "/formcontact",
         name: "Formcontact",
         component: () => import("@/views/FormContact.vue")
+    },
+    {
+        path: "/:pathMatch(.*)*",
+        name: "NotFound",
+        component: () => import("@/views/NotFound.vue")
     }
 ];
 
-export default createRouter({
+const router = createRouter({
     history: createWebHistory(),
     routes,
     scrollBehavior: () => ({ top: 0 })
 })
+
+router.beforeEach((to, from, next) => {
+    const isAdminToken = localStorage.getItem('laporgan_admin_token');
+    
+    // Jika rute butuh autentikasi admin dan token tidak ada, arahkan ke login
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        if (!isAdminToken) {
+            next('/login');
+        } else {
+            next();
+        }
+    } else {
+        // Jika sudah login admin, dan mencoba mengakses halaman login kembali, arahkan ke dashboard
+        if (to.path === '/login' && isAdminToken) {
+            next('/admin/dashboard');
+        } else {
+            next();
+        }
+    }
+})
+
+export default router;

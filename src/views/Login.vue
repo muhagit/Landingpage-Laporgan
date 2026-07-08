@@ -1,34 +1,44 @@
 <template>
     <section class="min-vh-100 bgr-gambar d-flex align-items-center justify-content-center ">
+        <!-- Alert error -->
+        <div v-if="showError" class="alert alert-danger position-fixed bottom-0 end-0 m-3 shadow-lg z-3" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> {{ errorMessage }}
+        </div>
+        <div v-if="showSuccess" class="alert alert-success position-fixed bottom-0 end-0 m-3 shadow-lg z-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> Login berhasil! Mengarahkan ke dashboard...
+        </div>
+
         <div class="container min-vh-100 d-flex justify-content-center align-items-center ">
             <div class="row d-flex justify-content-center align-items-center h-100 back-form py-5" data-aos="fade-up">
                 <h1 class="title mb-4 text-center">Masuk</h1>
 
                 <div class="w-100 px-4" style="max-width: 400px">
-                    <div class="mb-3">
-                        <label class="form-label nav-color fw-semibold">Username</label>
-                        <input type="text" class="form-control bg-light" placeholder="Masukkan username anda"
-                            v-model="username" />
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label nav-color fw-semibold">Password</label>
-                        <div class="input-group">
-                            <input :type="showPassword ? 'text' : 'password'" class="form-control bg-light"
-                                placeholder="Masukkan password anda" v-model="password" />
-                            <span class="input-group-text bg-light" @click="togglePassword" style="cursor: pointer">
-                                <i :class="showPassword
-                                    ? 'bi bi-eye-slash'
-                                    : 'bi bi-eye'
-                                    "></i>
-                            </span>
+                    <form @submit.prevent="handleLogin">
+                        <div class="mb-3">
+                            <label class="form-label nav-color fw-semibold">Username</label>
+                            <input type="text" class="form-control bg-light" placeholder="Masukkan username anda"
+                                v-model="username" required @keyup.enter="handleLogin" />
                         </div>
-                    </div>
 
-                    <div class="mb-3 text-end">
-                        <a href="#" class="text-decoration-none blue-color fw-semibold lupa-pass"><u>Lupa Password?</u></a>
-                    </div>
-                    <BlueButton text="Masuk" class="button-blue" />
+                        <div class="mb-2">
+                            <label class="form-label nav-color fw-semibold">Password</label>
+                            <div class="input-group">
+                                <input :type="showPassword ? 'text' : 'password'" class="form-control bg-light"
+                                    placeholder="Masukkan password anda" v-model="password" required @keyup.enter="handleLogin" />
+                                <span class="input-group-text bg-light" @click="togglePassword" style="cursor: pointer">
+                                    <i :class="showPassword
+                                        ? 'bi bi-eye-slash'
+                                        : 'bi bi-eye'
+                                        "></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 text-end">
+                            <a href="#" class="text-decoration-none blue-color fw-semibold lupa-pass"><u>Lupa Password?</u></a>
+                        </div>
+                        <BlueButton text="Masuk" class="button-blue" type="submit" />
+                    </form>
                     <div class="text-center mt-2">
                         <router-link to="/daftar">
                             <a href="#" class="text-decoration-none blue-color fw-semibold lupa-pass"><u>Saya belum
@@ -118,6 +128,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import BlueButton from '@/components/BlueButton.vue';
+
 export default {
     components: {
         BlueButton
@@ -128,12 +139,37 @@ export default {
             username: "",
             password: "",
             showPassword: false,
+            showError: false,
+            showSuccess: false,
+            errorMessage: "",
         };
     },
     methods: {
         togglePassword() {
             this.showPassword = !this.showPassword;
         },
+        handleLogin() {
+            if (!this.username || !this.password) {
+                this.errorMessage = "Username dan password wajib diisi!";
+                this.showError = true;
+                setTimeout(() => this.showError = false, 3000);
+                return;
+            }
+
+            // Cek admin credentials
+            if (this.username === "admin" && this.password === "admin") {
+                this.showSuccess = true;
+                localStorage.setItem("laporgan_admin_token", "mock-admin-token-xyz");
+                setTimeout(() => {
+                    this.showSuccess = false;
+                    this.$router.push("/admin/dashboard");
+                }, 1000);
+            } else {
+                this.errorMessage = "Username atau password salah! (Gunakan admin/admin)";
+                this.showError = true;
+                setTimeout(() => this.showError = false, 3000);
+            }
+        }
     },
 };
 </script>

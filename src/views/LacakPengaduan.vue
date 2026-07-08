@@ -152,6 +152,7 @@
 import BlueButton from "@/components/BlueButton.vue";
 import CardLacak from "@/components/CardLacak.vue";
 import FooterBlue from "@/components/FooterBlue.vue";
+import { api } from "@/utils/api";
 
 export default {
   components: {
@@ -184,10 +185,9 @@ export default {
   methods: {
     async lacakPengaduan() {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/lacak?tiket=${this.tiket}&ktp=${this.ktp}`);
-        const data = await response.json();
+        const data = await api.lacakPengaduan(this.tiket.trim(), this.ktp.trim());
 
-        if (response.ok && data) {
+        if (data) {
           this.laporan = data;
           this.notFound = false;
         } else {
@@ -201,9 +201,13 @@ export default {
       }
     },
     getImageUrl(path) {
+      if (!path) return '';
+      if (path.startsWith('http') || path.startsWith('data:image')) return path;
       return `http://127.0.0.1:8000/storage/${path}`;
     },
     getSuratUrl(path) {
+      if (!path) return '';
+      if (path.startsWith('http') || path.startsWith('data:')) return path;
       return `http://127.0.0.1:8000/storage/surat/${path}`;
     },
     getStatusClass(status) {

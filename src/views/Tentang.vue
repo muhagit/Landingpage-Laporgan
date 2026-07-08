@@ -1,5 +1,7 @@
 <script>
 import Card from "../components/icons/Card.vue";
+import { api } from "@/utils/api";
+
 export default {
     components: {
         Card,
@@ -7,27 +9,40 @@ export default {
 
     data() {
         return {
-            layananList: [
-                {
-                    judul: "Akses untuk Semua",
-                    deskripsi:
-                        "Setiap warga bisa menyampaikan aduan tanpa hambatan.",
-                    logo: "fa-solid fa-user",
-                },
-                {
-                    judul: "Privasi Terjamin",
-                    deskripsi: "Data dan identitas pelapor dijaga dengan baik.",
-                    logo: "fa-solid fa-shield-halved",
-                },
-                {
-                    judul: "Pantau Aduan",
-                    deskripsi:
-                        "Lacak status pengaduan secara real-time dari dashboard.",
-                    logo: "fa-solid fa-eye",
-                },
-            ],
+            aboutContent: {
+                title: "TENTANG",
+                subtitle: "LAYANAN",
+                description: "Laporgan hadir untuk memutus rantai birokrasi tersebut. Dengan platform digital yang aman, jaminan privasi, dan fitur pelacakan status laporan secara real-time, suara Anda kini bisa membawa perubahan. Lapor cepat, pantau mudah, dan wujudkan lingkungan yang lebih baik sekarang!",
+                services: [
+                    {
+                        judul: "Akses untuk Semua",
+                        deskripsi: "Setiap warga bisa menyampaikan aduan tanpa hambatan.",
+                        logo: "fa-solid fa-user",
+                    },
+                    {
+                        judul: "Privasi Terjamin",
+                        deskripsi: "Data dan identitas pelapor dijaga dengan baik.",
+                        logo: "fa-solid fa-shield-halved",
+                    },
+                    {
+                        judul: "Pantau Aduan",
+                        deskripsi: "Lacak status pengaduan secara real-time dari dashboard.",
+                        logo: "fa-solid fa-eye",
+                    },
+                ]
+            }
         };
     },
+    async mounted() {
+        try {
+            const data = await api.getLandingContent();
+            if (data && data.about) {
+                this.aboutContent = data.about;
+            }
+        } catch (e) {
+            console.error('Failed to load about section content:', e);
+        }
+    }
 };
 </script>
 
@@ -41,7 +56,7 @@ export default {
                         data-aos="fade-up"
                         data-aos-duration="800"
                     >
-                        TENTANG <br />
+                        {{ aboutContent.title }} <br />
                     </h2>
                     <h1
                         class="hero-h1 text-center blue-color"
@@ -49,7 +64,7 @@ export default {
                         data-aos-delay="200"
                         data-aos-duration="800"
                     >
-                        LAYANAN
+                        {{ aboutContent.subtitle }}
                     </h1>
                     <p
                         class="mx-auto text-center des"
@@ -57,11 +72,7 @@ export default {
                         data-aos="fade-up"
                         data-aos-delay="200"
                     >
-                        Laporgan hadir untuk memutus rantai birokrasi tersebut.
-                        Dengan platform digital yang aman, jaminan privasi, dan
-                        fitur pelacakan status laporan secara real-time, suara
-                        Anda kini bisa membawa perubahan. Lapor cepat, pantau
-                        mudah, dan wujudkan lingkungan yang lebih baik sekarang!
+                        {{ aboutContent.description }}
                     </p>
                 </div>
             </div>
@@ -71,7 +82,7 @@ export default {
                 >
                     <div
                         class="card-container"
-                        v-for="(layanan, index) in layananList"
+                        v-for="(layanan, index) in aboutContent.services"
                         :key="index"
                         :data-aos="'zoom-in-up'"
                         :data-aos-delay="index * 200 + 300"

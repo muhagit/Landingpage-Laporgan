@@ -11,6 +11,7 @@ import Unggahbukti from "../views/Unggahbukti.vue";
 import Login from "../views/Login.vue";
 import Daftar from "../views/Daftar.vue";
 import Jenis from "../views/Jenis.vue";
+import { api } from "@/utils/api";
 
 export default {
     components: {
@@ -26,6 +27,26 @@ export default {
         Daftar,
         Jenis,
     },
+    data() {
+        return {
+            heroContent: {
+                welcome: 'Selamat datang di',
+                title: 'LAPORGAN',
+                text1: 'Sering menemui jalan berlubang, fasilitas rusak, atau pelayanan publik yang lambat? Anda tidak sendirian.',
+                text2: 'Laporkan keluhan, saran, atau pelanggaran yang Anda temui di lingkungan di sini'
+            }
+        };
+    },
+    async mounted() {
+        try {
+            const data = await api.getLandingContent();
+            if (data && data.hero) {
+                this.heroContent = data.hero;
+            }
+        } catch (e) {
+            console.error('Failed to load landing content:', e);
+        }
+    }
 };
 </script>
 
@@ -157,30 +178,28 @@ export default {
                         data-aos="fade-right"
                         data-aos-delay="200"
                     >
-                        Selamat datang di
+                        {{ heroContent.welcome }}
                     </h6>
                     <h1
                         class="hero-title blue-color"
                         data-aos="fade-right"
                         data-aos-delay="300"
                     >
-                        <span class="">LAPORGAN</span>
+                        <span class="">{{ heroContent.title }}</span>
                     </h1>
                     <p
                         class="hero-text mt-2 my-lg-3"
                         data-aos="fade-up"
                         data-aos-delay="400"
                     >
-                        Sering menemui jalan berlubang, fasilitas rusak, atau
-                        pelayanan publik yang lambat? Anda tidak sendirian.
+                        {{ heroContent.text1 }}
                     </p>
                     <p
                         class="hero-text mt-lg-2"
                         data-aos="fade-up"
                         data-aos-delay="400"
                     >
-                        Laporkan keluhan, saran, atau pelanggaran yang Anda
-                        temui di lingkungan di sini
+                        {{ heroContent.text2 }}
                     </p>
                     <div
                         class="d-flex flex-column flex-md-row gap-3 justify-content-center justify-content-lg-start button-container"
