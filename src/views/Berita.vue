@@ -9,6 +9,20 @@ const selectedBerita = ref(null);
 
 const categories = ['Semua', 'Pembangunan', 'Pengumuman', 'Kegiatan'];
 
+const sliderTrack = ref(null);
+
+const scrollLeft = () => {
+  if (sliderTrack.value) {
+    sliderTrack.value.scrollBy({ left: -sliderTrack.value.offsetWidth, behavior: 'smooth' });
+  }
+};
+
+const scrollRight = () => {
+  if (sliderTrack.value) {
+    sliderTrack.value.scrollBy({ left: sliderTrack.value.offsetWidth, behavior: 'smooth' });
+  }
+};
+
 const fetchBerita = async () => {
   loading.value = true;
   try {
@@ -91,44 +105,64 @@ const getCategoryBadgeClass = (category) => {
         </div>
       </div>
 
-      <!-- News Grid -->
-      <div v-else class="row g-4 justify-content-center">
-        <div
-          v-for="berita in filteredBerita"
-          :key="berita.id"
-          class="col-xl-4 col-md-6"
-          data-aos="zoom-in"
-          data-aos-duration="600"
+      <!-- News Slider -->
+      <div v-else class="news-slider-wrapper position-relative" data-aos="fade-up">
+        <!-- Navigation Buttons -->
+        <button 
+          v-if="filteredBerita.length > 0"
+          @click="scrollLeft" 
+          class="slider-nav-btn prev-btn bg-white shadow rounded-circle d-flex align-items-center justify-content-center"
+          aria-label="Previous Slide"
         >
-          <div class="card h-100 news-card border-0 shadow-sm rounded-4 overflow-hidden" @click="selectedBerita = berita">
-            <div class="img-wrapper position-relative">
-              <img :src="berita.gambar" :alt="berita.judul" class="card-img-top news-img" />
-              <span :class="['position-absolute top-0 end-0 m-3 badge rounded-pill px-3 py-2 shadow-sm fs-7', getCategoryBadgeClass(berita.kategori)]">
-                {{ berita.kategori }}
-              </span>
-            </div>
-            <div class="card-body p-4 d-flex flex-column">
-              <div class="meta-info d-flex align-items-center gap-3 text-muted fs-7 mb-3">
-                <span class="d-flex align-items-center gap-1">
-                  <i class="far fa-calendar-alt"></i> {{ formatDate(berita.tanggal) }}
-                </span>
-                <span class="d-flex align-items-center gap-1">
-                  <i class="far fa-user"></i> {{ berita.penulis || 'Admin' }}
+          <i class="fas fa-chevron-left text-dark"></i>
+        </button>
+        
+        <button 
+          v-if="filteredBerita.length > 0"
+          @click="scrollRight" 
+          class="slider-nav-btn next-btn bg-white shadow rounded-circle d-flex align-items-center justify-content-center"
+          aria-label="Next Slide"
+        >
+          <i class="fas fa-chevron-right text-dark"></i>
+        </button>
+
+        <!-- Slider Track -->
+        <div ref="sliderTrack" class="news-slider-track d-flex gap-4">
+          <div
+            v-for="berita in filteredBerita"
+            :key="berita.id"
+            class="news-slide-item"
+          >
+            <div class="card h-100 news-card border-0 shadow-sm rounded-4 overflow-hidden" @click="selectedBerita = berita">
+              <div class="img-wrapper position-relative">
+                <img :src="berita.gambar" :alt="berita.judul" class="card-img-top news-img" />
+                <span :class="['position-absolute top-0 end-0 m-3 badge rounded-pill px-3 py-2 shadow-sm fs-7', getCategoryBadgeClass(berita.kategori)]">
+                  {{ berita.kategori }}
                 </span>
               </div>
-              <h5 class="card-title fw-bold text-dark mb-3 line-clamp-2">{{ berita.judul }}</h5>
-              <p class="card-text text-secondary mb-4 line-clamp-3 fs-6">{{ berita.ringkasan }}</p>
-              
-              <div class="mt-auto pt-2 border-top border-light d-flex align-items-center justify-content-between">
-                <span class="text-primary fw-semibold read-more-link cursor-pointer">
-                  Baca Selengkapnya <i class="fas fa-chevron-right ms-1 transition-all arrow-icon"></i>
-                </span>
+              <div class="card-body p-4 d-flex flex-column">
+                <div class="meta-info d-flex align-items-center gap-3 text-muted fs-7 mb-3">
+                  <span class="d-flex align-items-center gap-1">
+                    <i class="far fa-calendar-alt"></i> {{ formatDate(berita.tanggal) }}
+                  </span>
+                  <span class="d-flex align-items-center gap-1">
+                    <i class="far fa-user"></i> {{ berita.penulis || 'Admin' }}
+                  </span>
+                </div>
+                <h5 class="card-title fw-bold text-dark mb-3 line-clamp-2">{{ berita.judul }}</h5>
+                <p class="card-text text-secondary mb-4 line-clamp-3 fs-6">{{ berita.ringkasan }}</p>
+                
+                <div class="mt-auto pt-2 border-top border-light d-flex align-items-center justify-content-between">
+                  <span class="text-primary fw-semibold read-more-link cursor-pointer">
+                    Baca Selengkapnya <i class="fas fa-chevron-right ms-1 transition-all arrow-icon"></i>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div v-if="filteredBerita.length === 0" class="col-12 text-center py-5 text-muted">
+        <div v-if="filteredBerita.length === 0" class="w-100 text-center py-5 text-muted">
           <i class="far fa-newspaper fs-1 d-block mb-3"></i>
           <p class="fs-5">Belum ada berita atau artikel dalam kategori ini.</p>
         </div>
@@ -179,6 +213,89 @@ const getCategoryBadgeClass = (category) => {
 .berita-section {
   background-color: #f8f9fa;
   min-height: 400px;
+}
+
+/* Slider styling */
+.news-slider-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.news-slider-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  padding: 1rem 0.5rem;
+  margin: 0 -0.5rem;
+}
+
+.news-slider-track::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.news-slide-item {
+  flex: 0 0 calc(33.333% - 1rem); /* 3 items per screen on desktop */
+  min-width: 300px;
+}
+
+@media (max-width: 992px) {
+  .news-slide-item {
+    flex: 0 0 calc(50% - 0.75rem); /* 2 items per screen on tablet */
+  }
+}
+
+@media (max-width: 768px) {
+  .news-slide-item {
+    flex: 0 0 85%; /* 1 full item and part of next on mobile */
+  }
+}
+
+/* Slider Nav Buttons */
+.slider-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: none;
+  z-index: 10;
+  transition: all 0.3s ease;
+  opacity: 0.85;
+}
+
+.slider-nav-btn:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+  background-color: var(--blue-color) !important;
+}
+
+.slider-nav-btn:hover i {
+  color: white !important;
+}
+
+.prev-btn {
+  left: -24px;
+}
+
+.next-btn {
+  right: -24px;
+}
+
+@media (max-width: 1200px) {
+  .prev-btn {
+    left: -12px;
+  }
+  .next-btn {
+    right: -12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .slider-nav-btn {
+    display: none !important; /* Hide buttons on mobile, rely on swipe */
+  }
 }
 
 .divider {

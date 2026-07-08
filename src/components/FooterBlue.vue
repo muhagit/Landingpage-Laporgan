@@ -4,7 +4,7 @@
       class="container d-flex justify-content-between align-items-center flex-wrap footer-container"
     >
       <div class="footer-copy fw-bold text-start order-2 order-md-1">
-        Pengaduan masyarakat © 2025
+        LaporGan © 2026
       </div>
       <div
         class="footer-menu d-flex flex-wrap justify-content-end order-1 order-md-2"

@@ -58,14 +58,13 @@ onBeforeUnmount(() => {
   <nav v-if="showNavbar" ref="navbarContainer" class="navbar navbar-expand-lg navbar-dark shadow-lg fixed-top" id="navbar">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-       
         <router-link
           to="/"
-          class="text-decoration-none text-light fw-bold fst-italic d-flex flex-column flex-lg-row"
+          class="text-decoration-none text-light fw-bold fst-italic d-flex align-items-center gap-2"
           style="line-height: 1.2"
         >
-          <span class="me-lg-1">LaporGan</span>
-       
+          <img src="@/assets/logo.png" alt="Logo" style="height: 35px; width: auto; object-fit: contain;" />
+          <span>LaporGan</span>
         </router-link>
       </a>
 

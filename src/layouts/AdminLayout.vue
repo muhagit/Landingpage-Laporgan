@@ -36,7 +36,7 @@ onMounted(() => {
     <aside :class="['sidebar shadow-lg', { 'sidebar-collapsed': !isSidebarOpen }]">
       <div class="sidebar-header d-flex align-items-center justify-content-between px-4 py-3">
         <router-link to="/admin/dashboard" class="d-flex align-items-center gap-2 text-decoration-none text-light">
-          <i class="fas fa-shield-alt logo-icon"></i>
+          <img src="@/assets/logo.png" alt="Logo" style="height: 30px; width: auto; object-fit: contain;" />
           <span class="fw-bold fst-italic logo-text fs-4">LaporGan Admin</span>
         </router-link>
         <button class="btn btn-link text-light d-md-none border-0" @click="toggleSidebar">
