@@ -36,15 +36,7 @@ const beritaForm = ref({
   penulis: 'Admin LaporGan'
 });
 
-const showTestimonialModal = ref(false);
-const isEditingTestimonial = ref(false);
-const testimonialForm = ref({
-  index: null,
-  name: '',
-  location: '',
-  comment: '',
-  rating: 5
-});
+
 
 const showFaqModal = ref(false);
 const isEditingFaq = ref(false);
@@ -167,52 +159,6 @@ const deleteBerita = async (id) => {
   }
 };
 
-// ==================== TESTIMONIALS CRUD ====================
-const openAddTestiModal = () => {
-  testimonialForm.value = {
-    index: null,
-    name: '',
-    location: '',
-    comment: '',
-    rating: 5
-  };
-  isEditingTestimonial.value = false;
-  showTestimonialModal.value = true;
-};
-
-const openEditTestiModal = (testi, idx) => {
-  testimonialForm.value = {
-    index: idx,
-    name: testi.name,
-    location: testi.location,
-    comment: testi.comment,
-    rating: testi.rating
-  };
-  isEditingTestimonial.value = true;
-  showTestimonialModal.value = true;
-};
-
-const saveTestimonial = async () => {
-  const { index, name, location, comment, rating } = testimonialForm.value;
-  const avatar = name.charAt(0).toUpperCase();
-
-  if (isEditingTestimonial.value && index !== null) {
-    content.value.testimonials[index] = { name, location, comment, rating, avatar };
-  } else {
-    content.value.testimonials.push({ name, location, comment, rating, avatar });
-  }
-
-  showTestimonialModal.value = false;
-  await handleSave();
-};
-
-const deleteTestimonial = async (idx) => {
-  if (confirm('Hapus testimoni ini dari tampilan?')) {
-    content.value.testimonials.splice(idx, 1);
-    await handleSave();
-  }
-};
-
 // ==================== FAQ CRUD ====================
 const openAddFaqModal = () => {
   faqForm.value = {
@@ -321,15 +267,7 @@ const deleteFaq = async (idx) => {
                 <i class="fas fa-newspaper me-2"></i> Berita
               </button>
             </li>
-            <li class="nav-item">
-              <button 
-                type="button"
-                :class="['nav-link py-3.5 border-0 rounded-0 fw-bold fs-7', { active: activeTab === 'testi' }]"
-                @click="activeTab = 'testi'"
-              >
-                <i class="fas fa-comments me-2"></i> Suara Warga
-              </button>
-            </li>
+
             <li class="nav-item">
               <button 
                 type="button"
@@ -583,49 +521,6 @@ const deleteFaq = async (idx) => {
               </div>
             </div>
 
-            <!-- TAB 6: SUARA WARGA (TESTIMONI) -->
-            <div v-if="activeTab === 'testi'">
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold text-dark mb-0"><i class="fas fa-comments me-2 text-primary"></i> Kelola Suara Warga (Testimoni)</h5>
-                <button type="button" @click="openAddTestiModal" class="btn btn-primary btn-sm px-3 rounded-3 fw-bold">
-                  <i class="fas fa-plus me-1"></i> Tambah Testimoni
-                </button>
-              </div>
-
-              <div class="row g-4">
-                <div v-for="(testi, idx) in content.testimonials" :key="idx" class="col-md-6">
-                  <div class="card h-100 border border-slate-200/80 shadow-sm p-4 rounded-4 position-relative">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                      <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width:40px; height:40px;">
-                        {{ testi.avatar || testi.name.charAt(0) }}
-                      </div>
-                      <div>
-                        <h6 class="fw-bold text-dark mb-0">{{ testi.name }}</h6>
-                        <small class="text-muted">Warga {{ testi.location }}</small>
-                      </div>
-                      <div class="ms-auto rating-stars text-warning" style="font-size: 13px;">
-                        <i v-for="star in testi.rating" :key="star" class="fas fa-star"></i>
-                        <i v-for="star in (5 - testi.rating)" :key="star" class="far fa-star text-muted"></i>
-                      </div>
-                    </div>
-                    <p class="text-slate-600 fs-7 italic mb-0 flex-grow-1">"{{ testi.comment }}"</p>
-                    
-                    <div class="border-top mt-3 pt-2 d-flex justify-content-end gap-2">
-                      <button type="button" @click="openEditTestiModal(testi, idx)" class="btn btn-sm btn-outline-secondary px-2.5 rounded-2">
-                        <i class="fas fa-edit me-1"></i> Ubah
-                      </button>
-                      <button type="button" @click="deleteTestimonial(idx)" class="btn btn-sm btn-outline-danger px-2.5 rounded-2">
-                        <i class="fas fa-trash-alt me-1"></i> Hapus
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div v-if="!content.testimonials || content.testimonials.length === 0" class="col-12 text-center py-5 text-muted bg-light rounded-4">
-                  Belum ada testimoni. Klik tombol di kanan atas untuk menambahkan.
-                </div>
-              </div>
-            </div>
-
             <!-- TAB 7: FAQ -->
             <div v-if="activeTab === 'faq'">
               <div class="d-flex justify-content-between align-items-center mb-4">
@@ -684,7 +579,7 @@ const deleteFaq = async (idx) => {
             </div>
 
             <!-- Submit Button Bar (only for static copywriting pages, other tabs save via handlers) -->
-            <div v-if="activeTab !== 'berita' && activeTab !== 'testi' && activeTab !== 'faq'" class="border-top mt-5 pt-3 d-flex justify-content-end">
+            <div v-if="activeTab !== 'berita' && activeTab !== 'faq'" class="border-top mt-5 pt-3 d-flex justify-content-end">
               <button type="submit" :disabled="saving" class="btn btn-primary px-5 py-2.5 rounded-3 fw-bold shadow">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
                 <i v-else class="fas fa-save me-1"></i> Simpan Perubahan Tampilan
@@ -746,43 +641,6 @@ const deleteFaq = async (idx) => {
       </div>
     </div>
 
-    <!-- Modal Form Testimonial -->
-    <div v-if="showTestimonialModal" class="custom-modal-overlay" @click.self="showTestimonialModal = false">
-      <div class="custom-modal-card modal-medium">
-        <div class="custom-modal-header bg-light">
-          <h5 class="fw-bold mb-0 text-dark">{{ isEditingTestimonial ? 'Ubah Testimoni' : 'Tambah Testimoni Baru' }}</h5>
-          <button type="button" @click="showTestimonialModal = false" class="btn-close border-0 bg-transparent fs-5"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="custom-modal-body p-4">
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-dark fs-7">Nama Warga</label>
-            <input type="text" class="form-control" v-model="testimonialForm.name" required />
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-dark fs-7">Kecamatan / Lokasi Asal</label>
-            <input type="text" class="form-control" v-model="testimonialForm.location" placeholder="contoh: Condongcatur" required />
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-dark fs-7">Rating Kepuasan</label>
-            <select class="form-select" v-model="testimonialForm.rating">
-              <option :value="5">⭐⭐⭐⭐⭐ (5 Bintang)</option>
-              <option :value="4">⭐⭐⭐⭐ (4 Bintang)</option>
-              <option :value="3">⭐⭐⭐ (3 Bintang)</option>
-              <option :value="2">⭐⭐ (2 Bintang)</option>
-              <option :value="1">⭐ (1 Bintang)</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold text-dark fs-7">Komentar / Kalimat Testimoni</label>
-            <textarea class="form-control" rows="4" v-model="testimonialForm.comment" required></textarea>
-          </div>
-        </div>
-        <div class="custom-modal-footer bg-light p-3">
-          <button type="button" @click="showTestimonialModal = false" class="btn btn-light rounded-3 fw-bold">Batal</button>
-          <button type="button" @click="saveTestimonial" class="btn btn-primary rounded-3 fw-bold px-4">Simpan Testimoni</button>
-        </div>
-      </div>
-    </div>
 
     <!-- Modal Form FAQ -->
     <div v-if="showFaqModal" class="custom-modal-overlay" @click.self="showFaqModal = false">

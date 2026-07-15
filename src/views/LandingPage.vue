@@ -130,29 +130,6 @@ const faqs = ref([
   }
 ]);
 
-const testimonials = ref([
-  {
-    name: 'Budi Santoso',
-    location: 'Condongcatur',
-    avatar: 'B',
-    comment: 'Jalan berlubang parah di depan komplek kami sering membuat pengendara jatuh di malam hari. Setelah saya lapor di LaporGan dengan foto, dalam waktu 3 hari jalan sudah diaspal mulus oleh dinas PU. Sangat praktis!',
-    rating: 5
-  },
-  {
-    name: 'Rina Wijayanti',
-    location: 'Babarsari',
-    avatar: 'R',
-    comment: 'Lampu jalan dekat halte mati berminggu-minggu membuat area menjadi rawan. Saya laporkan lewat web ini, status langsung diupdate ke "Diproses". Lusa harinya teknisi datang mengganti bohlam baru. Responsnya luar biasa!',
-    rating: 5
-  },
-  {
-    name: 'Dedi Kurniawan',
-    location: 'Prawirodirjan',
-    avatar: 'D',
-    comment: 'Tumpukan sampah liar di pinggir sungai yang menyumbat air akhirnya diangkut secara massal oleh dinas kebersihan kecamatan setelah viral di laporan platform ini. Sekarang dipasang plang larangan buang sampah.',
-    rating: 4
-  }
-]);
 
 const loadData = async () => {
   loading.value = true;
@@ -163,7 +140,7 @@ const loadData = async () => {
       if (content.hero?.title) heroTitle.value = content.hero.title;
       if (content.hero?.text1) heroSubtitle.value = content.hero.text1;
       if (content.stats && content.stats.length > 0) stats.value = content.stats;
-      if (content.testimonials && content.testimonials.length > 0) testimonials.value = content.testimonials;
+
       if (content.faq_list && content.faq_list.length > 0) faqs.value = content.faq_list;
     } else {
       landingData.value = defaultLandingContent;
@@ -171,7 +148,7 @@ const loadData = async () => {
     
     // Fetch news for preview
     const news = await api.getBerita();
-    beritaList.value = news.slice(0, 3); // Ambil 3 berita terbaru
+    beritaList.value = [...news].reverse().slice(0, 3); // Ambil 3 berita terbaru
   } catch (error) {
     console.error('Error loading landing page data:', error);
     landingData.value = defaultLandingContent;
@@ -474,44 +451,6 @@ onMounted(() => {
         </div>
       </section>
 
-      <!-- Testimonial Section -->
-      <section class="testimonial-section py-6 bg-grey position-relative">
-        <div class="container py-4">
-          <div class="row justify-content-center mb-5 text-center">
-            <div class="col-lg-8" data-aos="fade-up">
-              <h6 class="text-primary fw-bold text-uppercase tracking-wider mb-2">Dampak Nyata</h6>
-              <h2 class="display-6 fw-bold text-dark mb-3">Suara Warga Yang Telah Terbantu</h2>
-              <div class="custom-divider mx-auto mb-4" style="width: 80px; height: 4px; background-color: var(--blue-color); border-radius: 2px;"></div>
-            </div>
-          </div>
-
-          <div class="row g-4 justify-content-center">
-            <div v-for="(testi, idx) in testimonials" :key="idx" class="col-lg-4 col-md-6" data-aos="fade-up" :data-aos-delay="idx * 150">
-              <div class="testimonial-card card h-100 border-0 shadow-sm rounded-4 p-4 text-start bg-white position-relative overflow-hidden">
-                <i class="fas fa-quote-right position-absolute end-0 bottom-0 text-light opacity-30 m-4" style="font-size: 5rem; pointer-events: none;"></i>
-                <div class="card-body p-2 d-flex flex-column h-100 position-relative z-2">
-                  <div class="rating-stars mb-3 text-warning">
-                    <i v-for="star in testi.rating" :key="star" class="fas fa-star"></i>
-                    <i v-for="star in (5 - testi.rating)" :key="star" class="far fa-star text-muted"></i>
-                  </div>
-                  <p class="text-secondary fs-7 mb-4 flex-grow-1" style="line-height: 1.6; font-style: italic;">
-                    "{{ testi.comment }}"
-                  </p>
-                  <div class="d-flex align-items-center gap-3 pt-3 border-top border-light">
-                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 42px; height: 42px;">
-                      {{ testi.avatar }}
-                    </div>
-                    <div>
-                      <h6 class="fw-bold text-dark mb-0">{{ testi.name }}</h6>
-                      <span class="fs-8 text-secondary">Warga {{ testi.location }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <!-- FAQ Section -->
       <section class="faq-section py-6 bg-white">
