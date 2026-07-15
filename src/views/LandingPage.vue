@@ -96,6 +96,11 @@ const defaultLandingContent = {
         deskripsi: 'Lacak tiket aduan Anda. Anda akan menerima notifikasi penyelesaian lengkap dengan foto hasil kerja dinas.'
       }
     ]
+  },
+  cta: {
+    title: 'Siap Menjadi Agen Perubahan?',
+    text: 'Jangan biarkan jalan rusak, tumpukan sampah, atau pemadaman lampu mengganggu kenyamanan bersama. Laporkan permasalahan di lingkungan Anda dalam hitungan detik.',
+    button: 'Mulai Buat Pengaduan'
   }
 };
 
@@ -106,7 +111,7 @@ const stats = ref([
   { value: '5', label: 'Kecamatan Terlayani', icon: 'fas fa-map-marked-alt', color: '#0dcaf0' }
 ]);
 
-const faqs = [
+const faqs = ref([
   {
     q: 'Apakah layanan LaporGan ini dipungut biaya?',
     a: 'Sama sekali tidak. Platform LaporGan disediakan sepenuhnya gratis untuk mempermudah warga dalam berpartisipasi menjaga fasilitas publik.'
@@ -123,7 +128,7 @@ const faqs = [
     q: 'Berapa lama laporan saya akan ditindaklanjuti?',
     a: 'Proses verifikasi admin memerlukan waktu maksimal 24 jam. Durasi pengerjaan di lapangan oleh dinas terkait bervariasi bergantung pada skala kerusakan dan prioritas anggaran, rata-rata diselesaikan dalam 2 hingga 7 hari kerja.'
   }
-];
+]);
 
 const testimonials = ref([
   {
@@ -159,6 +164,7 @@ const loadData = async () => {
       if (content.hero?.text1) heroSubtitle.value = content.hero.text1;
       if (content.stats && content.stats.length > 0) stats.value = content.stats;
       if (content.testimonials && content.testimonials.length > 0) testimonials.value = content.testimonials;
+      if (content.faq_list && content.faq_list.length > 0) faqs.value = content.faq_list;
     } else {
       landingData.value = defaultLandingContent;
     }
@@ -546,13 +552,13 @@ onMounted(() => {
                 <div class="cta-icon mx-auto mb-4 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-lg" style="width: 70px; height: 70px;">
                   <i class="fas fa-bullhorn fs-3"></i>
                 </div>
-                <h2 class="display-6 fw-black text-dark mb-3">Siap Menjadi Agen Perubahan?</h2>
+                <h2 class="display-6 fw-black text-dark mb-3">{{ landingData?.cta?.title || 'Siap Menjadi Agen Perubahan?' }}</h2>
                 <p class="lead text-secondary px-lg-5 fs-7 mb-5" style="line-height: 1.6;">
-                  Jangan biarkan jalan rusak, tumpukan sampah, atau pemadaman lampu mengganggu kenyamanan bersama. Laporkan permasalahan di lingkungan Anda dalam hitungan detik.
+                  {{ landingData?.cta?.text || 'Jangan biarkan jalan rusak, tumpukan sampah, atau pemadaman lampu mengganggu kenyamanan bersama. Laporkan permasalahan di lingkungan Anda dalam hitungan detik.' }}
                 </p>
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
                   <router-link to="/formpengaduan" class="text-decoration-none">
-                    <BlueButton text="Mulai Buat Pengaduan" class="px-5 py-3 shadow-md btn-glow-primary" icon="fa fa-arrow-right" />
+                    <BlueButton :text="landingData?.cta?.button || 'Mulai Buat Pengaduan'" class="px-5 py-3 shadow-md btn-glow-primary" icon="fa fa-arrow-right" />
                   </router-link>
                 </div>
               </div>

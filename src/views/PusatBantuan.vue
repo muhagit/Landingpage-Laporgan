@@ -318,6 +318,7 @@
 </template>
 
 <script>
+import { api } from '@/utils/api';
 import FooterBlue from "@/components/FooterBlue.vue";
 import FormContact from "./FormContact.vue";
 export default {
@@ -398,6 +399,19 @@ export default {
         ? this.filteredFaqs
         : this.filteredFaqs.slice(0, this.maxVisible);
     },
+  },
+  async mounted() {
+    try {
+      const content = await api.getLandingContent();
+      if (content && content.faq_list && content.faq_list.length > 0) {
+        this.faqs = content.faq_list.map(item => ({
+          question: item.q || item.question,
+          answer: item.a || item.answer
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading dynamic FAQs in PusatBantuan:', error);
+    }
   },
 };
 </script>

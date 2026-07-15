@@ -172,6 +172,52 @@ const initLocalStorage = () => {
             deskripsi: 'Setelah pengaduan diajukan, pihak terkait akan memberikan tanggapan atau tindakan selanjutnya.'
           }
         ]
+      },
+      testimonials: [
+        {
+          name: 'Budi Santoso',
+          location: 'Condongcatur',
+          avatar: 'B',
+          comment: 'Jalan berlubang parah di depan komplek kami sering membuat pengendara jatuh di malam hari. Setelah saya lapor di LaporGan dengan foto, dalam waktu 3 hari jalan sudah diaspal mulus oleh dinas PU. Sangat praktis!',
+          rating: 5
+        },
+        {
+          name: 'Rina Wijayanti',
+          location: 'Babarsari',
+          avatar: 'R',
+          comment: 'Lampu jalan dekat halte mati berminggu-minggu membuat area menjadi rawan. Saya laporkan lewat web ini, status langsung diupdate ke "Diproses". Lusa harinya teknisi datang mengganti bohlam baru. Responsnya luar biasa!',
+          rating: 5
+        },
+        {
+          name: 'Dedi Kurniawan',
+          location: 'Prawirodirjan',
+          avatar: 'D',
+          comment: 'Tumpukan sampah liar di pinggir sungai yang menyumbat air akhirnya diangkut secara massal oleh dinas kebersihan kecamatan setelah viral di laporan platform ini. Sekarang dipasang plang larangan buang sampah.',
+          rating: 4
+        }
+      ],
+      faq_list: [
+        {
+          q: 'Apakah layanan LaporGan ini dipungut biaya?',
+          a: 'Sama sekali tidak. Platform LaporGan disediakan sepenuhnya gratis untuk mempermudah warga dalam berpartisipasi menjaga fasilitas publik.'
+        },
+        {
+          q: 'Apakah data diri dan identitas saya aman?',
+          a: 'Keamanan data Anda adalah prioritas utama kami. Nama asli dan nomor identitas Anda disembunyikan sepenuhnya dari publik, dan hanya digunakan oleh admin untuk verifikasi internal jika diperlukan.'
+        },
+        {
+          q: 'Bagaimana cara melacak status penanganan laporan saya?',
+          a: 'Setiap laporan yang berhasil dikirim akan mendapatkan nomor tiket pelacakan unik. Anda dapat memasukkan nomor tiket dan NIK KTP Anda di halaman "Lacak Pengaduan" untuk memantau statusnya.'
+        },
+        {
+          q: 'Berapa lama laporan saya akan ditindaklanjuti?',
+          a: 'Proses verifikasi admin memerlukan waktu maksimal 24 jam. Durasi pengerjaan di lapangan oleh dinas terkait bervariasi bergantung pada skala kerusakan dan prioritas anggaran, rata-rata diselesaikan dalam 2 hingga 7 hari kerja.'
+        }
+      ],
+      cta: {
+        title: 'Siap Menjadi Agen Perubahan?',
+        text: 'Jangan biarkan jalan rusak, tumpukan sampah, atau pemadaman lampu mengganggu kenyamanan bersama. Laporkan permasalahan di lingkungan Anda dalam hitungan detik.',
+        button: 'Mulai Buat Pengaduan'
       }
     };
     localStorage.setItem('laporgan_landing_content', JSON.stringify(defaultLandingContent));
@@ -228,7 +274,6 @@ const fileToBase64 = (file) => {
 };
 
 // Helper converter untuk meratakan objek landing page ke baris Supabase copywriting dan sebaliknya
-// Helper converter untuk meratakan objek landing page ke baris Supabase copywriting dan sebaliknya
 const convertObjectToRows = (content) => {
   const rows = [];
   if (content.hero) {
@@ -259,6 +304,14 @@ const convertObjectToRows = (content) => {
   }
   if (content.testimonials !== undefined) {
     rows.push({ section: 'testimonials', content: JSON.stringify(content.testimonials) });
+  }
+  if (content.faq_list !== undefined) {
+    rows.push({ section: 'faq_list', content: JSON.stringify(content.faq_list) });
+  }
+  if (content.cta !== undefined) {
+    if (content.cta.title !== undefined) rows.push({ section: 'cta_title', content: content.cta.title });
+    if (content.cta.text !== undefined) rows.push({ section: 'cta_text', content: content.cta.text });
+    if (content.cta.button !== undefined) rows.push({ section: 'cta_button', content: content.cta.button });
   }
   return rows;
 };
@@ -305,7 +358,13 @@ const convertRowsToObject = (rows, defaultLandingContent) => {
       list: getJsonVal('langkah_list', defaultLandingContent?.langkah?.list || [])
     },
     stats: getJsonVal('stats', defaultLandingContent?.stats || []),
-    testimonials: getJsonVal('testimonials', defaultLandingContent?.testimonials || [])
+    testimonials: getJsonVal('testimonials', defaultLandingContent?.testimonials || []),
+    faq_list: getJsonVal('faq_list', defaultLandingContent?.faq_list || []),
+    cta: {
+      title: getVal('cta_title', defaultLandingContent?.cta?.title || 'Siap Menjadi Agen Perubahan?'),
+      text: getVal('cta_text', defaultLandingContent?.cta?.text || 'Jangan biarkan jalan rusak, tumpukan sampah, atau pemadaman lampu mengganggu kenyamanan bersama. Laporkan permasalahan di lingkungan Anda dalam hitungan detik.'),
+      button: getVal('cta_button', defaultLandingContent?.cta?.button || 'Mulai Buat Pengaduan')
+    }
   };
 };
 
@@ -638,58 +697,71 @@ export const api = {
   // ==================== BERITA ====================
   async getBerita() {
     try {
+      const { data, error } = await supabase
+        .from('copywriting')
+        .select('*')
+        .eq('section', 'berita_list');
+      
+      if (!error && data && data.length > 0) {
+        return JSON.parse(data[0].content);
+      }
+      
+      // Auto-seed to Supabase if empty
+      if (!error && data && data.length === 0) {
+        const seededBerita = JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
+        await supabase.from('copywriting').insert({ section: 'berita_list', content: JSON.stringify(seededBerita) });
+        return seededBerita;
+      }
+    } catch (e) {
+      console.warn('Gagal memuat berita dari Supabase, menggunakan local fallback', e);
+    }
+
+    try {
       const response = await fetch(`${BASE_URL}/berita`, { signal: AbortSignal.timeout(3000) });
       if (response.ok) {
         return await response.json();
       }
     } catch (e) {
-      console.warn('Backend API /berita tidak dapat dijangkau, menggunakan localStorage fallback', e);
+      // Offline
     }
     return JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
   },
 
   async createBerita(beritaData) {
-    try {
-      const response = await fetch(`${BASE_URL}/berita`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(beritaData),
-        signal: AbortSignal.timeout(3000)
-      });
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (e) {
-      console.warn('Gagal menambah berita ke backend, simpan lokal.', e);
-    }
-
-    const berita = JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
+    const berita = await this.getBerita();
     const newBerita = {
       id: berita.length > 0 ? Math.max(...berita.map(b => b.id)) + 1 : 1,
       ...beritaData,
       tanggal: new Date().toISOString()
     };
     berita.push(newBerita);
+
+    try {
+      const { error } = await supabase
+        .from('copywriting')
+        .upsert({ section: 'berita_list', content: JSON.stringify(berita) }, { onConflict: 'section' });
+      if (error) throw error;
+    } catch (e) {
+      console.warn('Gagal menambah berita ke Supabase:', e);
+    }
+
+    try {
+      await fetch(`${BASE_URL}/berita`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBerita),
+        signal: AbortSignal.timeout(3000)
+      });
+    } catch (e) {
+      // Offline fallback
+    }
+
     localStorage.setItem('laporgan_berita', JSON.stringify(berita));
     return newBerita;
   },
 
   async updateBerita(id, beritaData) {
-    try {
-      const response = await fetch(`${BASE_URL}/berita/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(beritaData),
-        signal: AbortSignal.timeout(3000)
-      });
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (e) {
-      console.warn('Gagal update berita ke backend, simpan lokal.', e);
-    }
-
-    const berita = JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
+    const berita = await this.getBerita();
     const index = berita.findIndex(b => b.id === parseInt(id));
     if (index !== -1) {
       berita[index] = {
@@ -697,6 +769,27 @@ export const api = {
         ...beritaData,
         updated_at: new Date().toISOString()
       };
+
+      try {
+        const { error } = await supabase
+          .from('copywriting')
+          .upsert({ section: 'berita_list', content: JSON.stringify(berita) }, { onConflict: 'section' });
+        if (error) throw error;
+      } catch (e) {
+        console.warn('Gagal update berita di Supabase:', e);
+      }
+
+      try {
+        await fetch(`${BASE_URL}/berita/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(berita[index]),
+          signal: AbortSignal.timeout(3000)
+        });
+      } catch (e) {
+        // Offline fallback
+      }
+
       localStorage.setItem('laporgan_berita', JSON.stringify(berita));
       return berita[index];
     }
@@ -704,21 +797,29 @@ export const api = {
   },
 
   async deleteBerita(id) {
+    let berita = await this.getBerita();
+    berita = berita.filter(b => b.id !== parseInt(id));
+
     try {
-      const response = await fetch(`${BASE_URL}/berita/${id}`, {
+      const { error } = await supabase
+        .from('copywriting')
+        .upsert({ section: 'berita_list', content: JSON.stringify(berita) }, { onConflict: 'section' });
+      if (error) throw error;
+    } catch (e) {
+      console.warn('Gagal hapus berita di Supabase:', e);
+    }
+
+    try {
+      await fetch(`${BASE_URL}/berita/${id}`, {
         method: 'DELETE',
         signal: AbortSignal.timeout(3000)
       });
-      if (response.ok) {
-        return true;
-      }
     } catch (e) {
-      console.warn('Gagal hapus berita dari backend, hapus lokal.', e);
+      // Offline fallback
     }
 
-    let berita = JSON.parse(localStorage.getItem('laporgan_berita') || '[]');
-    berita = berita.filter(b => b.id !== parseInt(id));
     localStorage.setItem('laporgan_berita', JSON.stringify(berita));
     return true;
   }
 };
+
