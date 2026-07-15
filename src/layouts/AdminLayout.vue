@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { supabase } from '@/lib/supabaseClient';
 
 const router = useRouter();
 const route = useRoute();
@@ -10,9 +11,15 @@ const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value;
 };
 
-const logoutAdmin = () => {
-  localStorage.removeItem('laporgan_admin_token');
-  router.push('/login');
+const logoutAdmin = async () => {
+  try {
+    await supabase.auth.signOut();
+  } catch (err) {
+    console.error('Error signing out:', err);
+  } finally {
+    localStorage.removeItem('laporgan_admin_token');
+    router.push('/login');
+  }
 };
 
 // Check mobile size on mount to auto-collapse sidebar

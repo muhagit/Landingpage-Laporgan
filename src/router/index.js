@@ -1,7 +1,9 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
+import { supabase } from '@/lib/supabaseClient'
 
 const Home = () => import('@/views/Home.vue')
+const LandingPage = () => import('@/views/LandingPage.vue')
 const Tentang = () => import('@/views/Tentang.vue')
 const Daftar = () => import('@/views/Daftar.vue')
 const Login = () => import('@/views/Login.vue')
@@ -13,7 +15,7 @@ const routes = [
     {
         path: "/",
         name: "Home",
-        component: Home,
+        component: LandingPage,
         children: [
             {
                 path: "tentang",
@@ -98,20 +100,30 @@ const router = createRouter({
     scrollBehavior: () => ({ top: 0 })
 })
 
-router.beforeEach((to, from, next) => {
-    const isAdminToken = localStorage.getItem('laporgan_admin_token');
-    
-    // Jika rute butuh autentikasi admin dan token tidak ada, arahkan ke login
-    if (to.matched.some(record => record.meta.requiresAuth)) {
-        if (!isAdminToken) {
-            next('/login');
+router.beforeEach(async (to, from, next) => {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Jika rute butuh autentikasi admin dan token tidak ada, arahkan ke login
+        if (to.matched.some(record => record.meta.requiresAuth)) {
+            if (!session) {
+                next('/login');
+            } else {
+                next();
+            }
         } else {
-            next();
+            // Jika sudah login admin, dan mencoba mengakses halaman login kembali, arahkan ke dashboard
+            if (to.path === '/login' && session) {
+                next('/admin/dashboard');
+            } else {
+                next();
+            }
         }
-    } else {
-        // Jika sudah login admin, dan mencoba mengakses halaman login kembali, arahkan ke dashboard
-        if (to.path === '/login' && isAdminToken) {
-            next('/admin/dashboard');
+    } catch (err) {
+        console.error('Routing check session error:', err);
+        // Jika terjadi error, biarkan halaman dimuat normal atau redirect ke login jika butuh auth
+        if (to.matched.some(record => record.meta.requiresAuth)) {
+            next('/login');
         } else {
             next();
         }

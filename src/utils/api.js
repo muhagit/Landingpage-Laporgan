@@ -1,3 +1,5 @@
+import { supabase } from '@/lib/supabaseClient';
+
 // Helper API untuk LaporGan dengan fallback cerdas ke localStorage jika backend offline
 const BASE_URL = 'http://127.0.0.1:8000/api';
 
@@ -225,6 +227,88 @@ const fileToBase64 = (file) => {
   });
 };
 
+// Helper converter untuk meratakan objek landing page ke baris Supabase copywriting dan sebaliknya
+// Helper converter untuk meratakan objek landing page ke baris Supabase copywriting dan sebaliknya
+const convertObjectToRows = (content) => {
+  const rows = [];
+  if (content.hero) {
+    if (content.hero.welcome !== undefined) rows.push({ section: 'hero_welcome', content: content.hero.welcome });
+    if (content.hero.title !== undefined) rows.push({ section: 'hero_title', content: content.hero.title });
+    if (content.hero.text1 !== undefined) rows.push({ section: 'hero_subtitle', content: content.hero.text1 });
+    if (content.hero.text2 !== undefined) rows.push({ section: 'hero_text2', content: content.hero.text2 });
+    if (content.hero.image !== undefined) rows.push({ section: 'hero_image', content: content.hero.image });
+  }
+  if (content.about) {
+    if (content.about.title !== undefined) rows.push({ section: 'about_title', content: content.about.title });
+    if (content.about.subtitle !== undefined) rows.push({ section: 'about_subtitle', content: content.about.subtitle });
+    if (content.about.description !== undefined) rows.push({ section: 'about_description', content: content.about.description });
+    if (content.about.services !== undefined) rows.push({ section: 'about_services', content: JSON.stringify(content.about.services) });
+  }
+  if (content.jenis) {
+    if (content.jenis.title !== undefined) rows.push({ section: 'jenis_title', content: content.jenis.title });
+    if (content.jenis.description !== undefined) rows.push({ section: 'jenis_description', content: content.jenis.description });
+    if (content.jenis.list !== undefined) rows.push({ section: 'jenis_list', content: JSON.stringify(content.jenis.list) });
+  }
+  if (content.langkah) {
+    if (content.langkah.title !== undefined) rows.push({ section: 'langkah_title', content: content.langkah.title });
+    if (content.langkah.description !== undefined) rows.push({ section: 'langkah_description', content: content.langkah.description });
+    if (content.langkah.list !== undefined) rows.push({ section: 'langkah_list', content: JSON.stringify(content.langkah.list) });
+  }
+  if (content.stats !== undefined) {
+    rows.push({ section: 'stats', content: JSON.stringify(content.stats) });
+  }
+  if (content.testimonials !== undefined) {
+    rows.push({ section: 'testimonials', content: JSON.stringify(content.testimonials) });
+  }
+  return rows;
+};
+
+const convertRowsToObject = (rows, defaultLandingContent) => {
+  const getVal = (section, defaultVal) => {
+    const row = rows.find(r => r.section === section);
+    return row ? row.content : defaultVal;
+  };
+
+  const getJsonVal = (section, defaultVal) => {
+    const row = rows.find(r => r.section === section);
+    if (!row) return defaultVal;
+    try {
+      return JSON.parse(row.content);
+    } catch (e) {
+      console.error(`Failed to parse JSON for section ${section}:`, e);
+      return defaultVal;
+    }
+  };
+
+  return {
+    hero: {
+      welcome: getVal('hero_welcome', defaultLandingContent?.hero?.welcome || ''),
+      title: getVal('hero_title', defaultLandingContent?.hero?.title || ''),
+      text1: getVal('hero_subtitle', defaultLandingContent?.hero?.text1 || ''),
+      text2: getVal('hero_text2', defaultLandingContent?.hero?.text2 || ''),
+      image: getVal('hero_image', defaultLandingContent?.hero?.image || '')
+    },
+    about: {
+      title: getVal('about_title', defaultLandingContent?.about?.title || ''),
+      subtitle: getVal('about_subtitle', defaultLandingContent?.about?.subtitle || ''),
+      description: getVal('about_description', defaultLandingContent?.about?.description || ''),
+      services: getJsonVal('about_services', defaultLandingContent?.about?.services || [])
+    },
+    jenis: {
+      title: getVal('jenis_title', defaultLandingContent?.jenis?.title || ''),
+      description: getVal('jenis_description', defaultLandingContent?.jenis?.description || ''),
+      list: getJsonVal('jenis_list', defaultLandingContent?.jenis?.list || [])
+    },
+    langkah: {
+      title: getVal('langkah_title', defaultLandingContent?.langkah?.title || ''),
+      description: getVal('langkah_description', defaultLandingContent?.langkah?.description || ''),
+      list: getJsonVal('langkah_list', defaultLandingContent?.langkah?.list || [])
+    },
+    stats: getJsonVal('stats', defaultLandingContent?.stats || []),
+    testimonials: getJsonVal('testimonials', defaultLandingContent?.testimonials || [])
+  };
+};
+
 export const api = {
   // ==================== KATEGORI ====================
   async getKategori() {
@@ -386,7 +470,7 @@ export const api = {
       isi_laporan,
       bukti_foto: fotoUrl,
       status_laporan: 'Diterima',
-      tanggapan: 'Laporan Anda sudah kami terima dan akan segera diverifikasi oleh tim admin LaporGan.',
+      tanggapan: 'Laporan Anda sudah kami terima and akan segera diverifikasi oleh tim admin LaporGan.',
       surat_tindak: '',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -489,6 +573,29 @@ export const api = {
 
   async getLandingContent() {
     try {
+      const { data, error } = await supabase
+        .from('copywriting')
+        .select('*');
+
+      if (!error) {
+        const defaultLandingContent = JSON.parse(localStorage.getItem('laporgan_landing_content') || '{}');
+        
+        // Auto-seed if table is empty
+        if (data && data.length === 0) {
+          const rows = convertObjectToRows(defaultLandingContent);
+          await supabase.from('copywriting').insert(rows);
+          return defaultLandingContent;
+        }
+        
+        if (data && data.length > 0) {
+          return convertRowsToObject(data, defaultLandingContent);
+        }
+      }
+    } catch (e) {
+      console.warn('Gagal memuat copywriting dari Supabase, beralih ke local/API fallback', e);
+    }
+
+    try {
       const response = await fetch(`${BASE_URL}/landing-content`, { signal: AbortSignal.timeout(2000) });
       if (response.ok) {
         return await response.json();
@@ -500,6 +607,17 @@ export const api = {
   },
 
   async saveLandingContent(content) {
+    try {
+      const rows = convertObjectToRows(content);
+      const { error } = await supabase
+        .from('copywriting')
+        .upsert(rows, { onConflict: 'section' });
+
+      if (error) throw error;
+    } catch (e) {
+      console.warn('Gagal menyimpan copywriting ke Supabase:', e);
+    }
+
     try {
       const response = await fetch(`${BASE_URL}/landing-content`, {
         method: 'POST',

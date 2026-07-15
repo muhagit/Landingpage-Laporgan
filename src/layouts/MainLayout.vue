@@ -12,7 +12,7 @@ const isNavOpen = ref(false);
 const route = useRoute();
 const showNavbar = computed(() => {
   const path = route.path || '';
-  return !path.startsWith('/admin') && path !== '/login' && path !== '/daftar';
+  return !path.startsWith('/admin') && path !== '/login' && path !== '/daftar' && path !== '/';
 });
 const handleClickOutside = (event) => {
   if (isNavOpen.value && navbarContainer.value && !navbarContainer.value.contains(event.target)) {

@@ -1,175 +1,159 @@
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { supabase } from '@/lib/supabaseClient'
+
+const router = useRouter()
+const email = ref('')
+const password = ref('')
+const loading = ref(false)
+const showPassword = ref(false)
+
+const showSuccess = ref(false)
+const showError = ref(false)
+const errorMessage = ref('')
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
+}
+
+const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    errorMessage.value = 'Email dan Password wajib diisi!'
+    showError.value = true
+    setTimeout(() => { showError.value = false }, 3000)
+    return
+  }
+
+  loading.value = true
+  showError.value = false
+  showSuccess.value = false
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.value,
+      password: password.value,
+    })
+
+    if (error) {
+      errorMessage.value = error.message || 'Email atau Password salah!'
+      showError.value = true
+      setTimeout(() => { showError.value = false }, 3500)
+    } else {
+      showSuccess.value = true
+      localStorage.setItem('laporgan_admin_token', data.session.access_token)
+      setTimeout(() => {
+        router.push('/admin/dashboard')
+      }, 1000)
+    }
+  } catch (err) {
+    console.error('Login error:', err)
+    errorMessage.value = 'Terjadi kesalahan sistem. Silakan coba lagi.'
+    showError.value = true
+    setTimeout(() => { showError.value = false }, 3500)
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
 <template>
-    <section class="min-vh-100 bgr-gambar d-flex align-items-center justify-content-center ">
-        <!-- Alert error -->
-        <div v-if="showError" class="alert alert-danger position-fixed bottom-0 end-0 m-3 shadow-lg z-3" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i> {{ errorMessage }}
+  <div class="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+    <!-- background glowing decorative elements -->
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-600 rounded-full filter blur-[150px] opacity-25"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-600 rounded-full filter blur-[150px] opacity-25"></div>
+
+    <!-- Alert notifications -->
+    <Transition name="fade">
+      <div v-if="showError" class="fixed bottom-5 right-5 bg-red-500 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 z-50 transition-all duration-300">
+        <i class="fas fa-exclamation-circle text-lg"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+    </Transition>
+    <Transition name="fade">
+      <div v-if="showSuccess" class="fixed bottom-5 right-5 bg-green-500 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 z-50 transition-all duration-300">
+        <i class="fas fa-check-circle text-lg"></i>
+        <span>Login berhasil! Mengarahkan ke dashboard...</span>
+      </div>
+    </Transition>
+
+    <div class="w-full max-w-md bg-slate-800/80 backdrop-blur-xl border border-slate-700/50 rounded-3xl shadow-2xl p-8 relative z-10" data-aos="fade-up">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <router-link to="/" class="inline-flex items-center gap-2 mb-4 text-decoration-none">
+          <img src="@/assets/logo.png" alt="LaporGan Logo" class="h-10 w-auto object-contain" />
+          <span class="text-2xl font-black text-white tracking-tight">LaporGan</span>
+        </router-link>
+        <h2 class="text-xl font-bold text-slate-100">Portal Admin</h2>
+        <p class="text-slate-400 text-sm mt-1">Silakan masuk menggunakan kredensial admin Anda</p>
+      </div>
+
+      <!-- Form -->
+      <form @submit.prevent="handleLogin" class="space-y-5">
+        <div>
+          <label class="block text-slate-300 text-sm font-semibold mb-2">Email</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+              <i class="fas fa-envelope"></i>
+            </span>
+            <input 
+              type="email" 
+              class="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 placeholder-slate-500 rounded-xl transition duration-200 text-sm focus:outline-none"
+              placeholder="admin@laporgan.com" 
+              v-model="email" 
+              required 
+            />
+          </div>
         </div>
-        <div v-if="showSuccess" class="alert alert-success position-fixed bottom-0 end-0 m-3 shadow-lg z-3" role="alert">
-            <i class="fas fa-check-circle me-2"></i> Login berhasil! Mengarahkan ke dashboard...
+
+        <div>
+          <label class="block text-slate-300 text-sm font-semibold mb-2">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+              <i class="fas fa-lock"></i>
+            </span>
+            <input 
+              :type="showPassword ? 'text' : 'password'" 
+              class="w-full pl-10 pr-12 py-3 bg-slate-900/50 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200 placeholder-slate-500 rounded-xl transition duration-200 text-sm focus:outline-none"
+              placeholder="••••••••" 
+              v-model="password" 
+              required 
+            />
+            <button 
+              type="button"
+              @click="togglePassword" 
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-300 transition focus:outline-none"
+            >
+              <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
         </div>
 
-        <div class="container min-vh-100 d-flex justify-content-center align-items-center ">
-            <div class="row d-flex justify-content-center align-items-center h-100 back-form py-5" data-aos="fade-up">
-                <h1 class="title mb-4 text-center">Masuk</h1>
+        <button 
+          type="submit" 
+          :disabled="loading"
+          class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition duration-200 text-sm flex items-center justify-center gap-2"
+        >
+          <span v-if="loading" class="spinner-border spinner-border-sm border-2 animate-spin rounded-full w-4 h-4 border-t-transparent border-white"></span>
+          <span>{{ loading ? 'Sedang Masuk...' : 'Masuk' }}</span>
+        </button>
+      </form>
 
-                <div class="w-100 px-4" style="max-width: 400px">
-                    <form @submit.prevent="handleLogin">
-                        <div class="mb-3">
-                            <label class="form-label nav-color fw-semibold">Username</label>
-                            <input type="text" class="form-control bg-light" placeholder="Masukkan username anda"
-                                v-model="username" required @keyup.enter="handleLogin" />
-                        </div>
-
-                        <div class="mb-2">
-                            <label class="form-label nav-color fw-semibold">Password</label>
-                            <div class="input-group">
-                                <input :type="showPassword ? 'text' : 'password'" class="form-control bg-light"
-                                    placeholder="Masukkan password anda" v-model="password" required @keyup.enter="handleLogin" />
-                                <span class="input-group-text bg-light" @click="togglePassword" style="cursor: pointer">
-                                    <i :class="showPassword
-                                        ? 'bi bi-eye-slash'
-                                        : 'bi bi-eye'
-                                        "></i>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3 text-end">
-                            <a href="#" class="text-decoration-none blue-color fw-semibold lupa-pass"><u>Lupa Password?</u></a>
-                        </div>
-                        <BlueButton text="Masuk" class="button-blue" type="submit" />
-                    </form>
-                    <div class="text-center mt-2">
-                        <router-link to="/daftar">
-                            <a href="#" class="text-decoration-none blue-color fw-semibold lupa-pass"><u>Saya belum
-                                    memiliki akun</u></a>
-                        </router-link>
-                    </div>
-                    <p class="text-center text-decoration-none blue-color fw-semibold lupa-pass mt-1">atau</p>
-                    <div class="d-flex justify-content-center my-1">
-                        <img src="../assets/Google.png" alt="" class="img-container gambar">
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </section>
+      <div class="text-center mt-6 text-xs text-slate-500 border-t border-slate-700/50 pt-4">
+        &copy; 2026 LaporGan. Hak Cipta Dilindungi.
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.bgr-gambar {
-    background-image: url("../assets/Images/bgindo.png");
-    background-size: 100%;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
-
-.back-form {
-    background-image: url("../assets/Images/texture.png");
-    /* border-top-left-radius: 40px; */
-    border-radius: 40px;
-}
-
-.lupa-pass {
-    font-size: 14px;
-}
-
-.button-blue {
-  transition: all 0.3s ease-in-out;
-  position: relative;
-  background: #007bff;
-  width: 100%;
-}
-
-.button-blue:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
-}
-
-.button-blue::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  background: inherit;
-  filter: blur(40px);
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-  transition: all 0.3s ease;
-  z-index: -1;
-}
-
-.button-blue:hover::after {
-  opacity: 0.7;
-  transform: scale(1.1);
-}
-
-.gambar {
-    border: solid 2px black;
-    width: 250px;
-    border-radius: 50px;
-
-}
-
-.google {
-
-    border-radius: 50px;
-
-}
-
-.title {
-    color: var(--nav-color);
-    font-size: 32px;
-    font-weight: 700;
+  transform: translateY(10px);
 }
 </style>
-
-<script>
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap-icons/font/bootstrap-icons.css'
-import BlueButton from '@/components/BlueButton.vue';
-
-export default {
-    components: {
-        BlueButton
-    },
-
-    data() {
-        return {
-            username: "",
-            password: "",
-            showPassword: false,
-            showError: false,
-            showSuccess: false,
-            errorMessage: "",
-        };
-    },
-    methods: {
-        togglePassword() {
-            this.showPassword = !this.showPassword;
-        },
-        handleLogin() {
-            if (!this.username || !this.password) {
-                this.errorMessage = "Username dan password wajib diisi!";
-                this.showError = true;
-                setTimeout(() => this.showError = false, 3000);
-                return;
-            }
-
-            // Cek admin credentials
-            if (this.username === "admin" && this.password === "admin") {
-                this.showSuccess = true;
-                localStorage.setItem("laporgan_admin_token", "mock-admin-token-xyz");
-                setTimeout(() => {
-                    this.showSuccess = false;
-                    this.$router.push("/admin/dashboard");
-                }, 1000);
-            } else {
-                this.errorMessage = "Username atau password salah! (Gunakan admin/admin)";
-                this.showError = true;
-                setTimeout(() => this.showError = false, 3000);
-            }
-        }
-    },
-};
-</script>
