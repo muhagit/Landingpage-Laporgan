@@ -149,13 +149,13 @@ const handleSave = async () => {
               <div class="row g-3 mb-4">
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label fw-semibold text-dark fs-7">Judul Section (Baris 1)</label>
+                    <label class="form-label fw-semibold text-dark fs-7">Judul Section (Baris 2)</label>
                     <input type="text" class="form-control" v-model="content.about.title" required />
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label fw-semibold text-dark fs-7">Judul Section (Baris 2)</label>
+                    <label class="form-label fw-semibold text-dark fs-7">Judul Section (Baris 1)</label>
                     <input type="text" class="form-control" v-model="content.about.subtitle" required />
                   </div>
                 </div>
